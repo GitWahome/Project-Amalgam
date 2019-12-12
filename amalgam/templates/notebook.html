@@ -1,0 +1,206 @@
+{% extends "/layout.html" %}
+
+{% block content %}
+
+<article class="media content-section" xmlns="http://www.w3.org/1999/html">
+  <img class="img-thumbnail article-img" src="{{url_for('static', filename='profile_pics/'+notebook.author.image_file)}}">
+      <div class="media-body">
+            <div class="article-metadata">
+                <h2 class="article-title">{{ notebook.title }}</h2>
+                <b>Written by</b> <a class="mr-2" href="{{ url_for('user_notebooks', username=notebook.author.username)}}">{{ notebook.author.username }}</a>
+                <b>on</b> <small class="text-muted">{{ notebook.date_posted.strftime('%Y-%m-%d')}}</small>
+            </div>
+             <div>
+                <small>{{ notebook.description|safe }}</small>
+            </div>
+
+
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('update_notebook', notebook_id = notebook.id) }}"><button class="btn-sm btn-primary" >Update Notebook</button></a>
+                <button type="button" class="btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Notebook</button>
+            {%endif%}
+
+
+      </div>
+
+
+</article>
+    <div id="base-res">
+
+             <div class="section-titles">
+                <h1 class="article-title" >Base Resources</h1>
+                {% for base_resource in base_resources %}
+                    <a href="#base{{ base_resource.id }}" class="btn btn-outline-dark btn-sm">{{ base_resource.title }}</a>
+                {% endfor %}
+            </div>
+        <div class="content-section">
+        <!--Base form-->
+            <fieldset class="form-group">
+                <form action="{{ url_for('add_base_resources', notebook_id=notebook.id) }}" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        {{ base_resource_form.title.label(class='form-control-label') }}
+                        {% if base_resource_form.title.errors %}
+                          {{ base_resource_form.title(class= 'form-control form-control-lg is-invalid') }}
+                          <div class="invalid-feedback">
+                            {% for error in base_resource_form.title.errors %}
+                              <span> {{ error }}</span>
+                            {% endfor %}
+                          </div>
+                          {%else %}
+                          {{ base_resource_form.title(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+                     <div class="form-group mt-2">
+                        <button  type="submit" class="plus-button" data-toggle="tooltip" title="Add New Base Resource"></button>
+                    </div>
+
+
+                </form>
+            </fieldset>
+        </div>
+
+
+        <div id="accordion" class="panel-group" role="tablist" aria-multiselectable="true">
+            {% for base_resource in base_resources %}
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="heading{{ base_resource.id }}">
+                    <h4 class="panel-title" id="base{{ base_resource.id }}">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ base_resource.id }}base" aria-expanded="true" aria-controls="collapse{{ base_resource.id }}base">
+                            <i class="more-less icon-max"></i>
+                            {{ loop.index }} {{ base_resource.title }}
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse{{ base_resource.id }}base" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ base_resource.id }}base">
+                    <div class="panel-body">
+
+                        <section class="sheet padding-10mm" id="{{ base_resource.id }}">
+
+                                <!-- Write HTML just like a web page, parse |safe to escape-->
+                            <div name="view" class="view_ckcontent" style="display: none">
+                                {{ base_resource.content|safe}}
+                            </div>
+
+                            {% if notebook.author == current_user%}
+                                <div style="text-align: center">
+                                    <form action="{{ url_for('delete_base_resource', base_resource_id=base_resource.id, notebook_id = notebook.id) }}" method="POST">
+                                        <a class = "btn btn-primary mt-1 mb-1" href="{{ url_for('update_base', notebook_id = notebook.id, base_resource_id = base_resource.id) }}">Update Resource</a>
+                                        <button type="submit" class="btn btn-danger m-1">Delete</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                         </section>
+
+                    </div>
+                </div>
+		    </div>
+
+
+            {% endfor %}
+        </div>
+    </div>
+
+
+
+    <hr/><br/>
+
+    <div id="support-res">
+             <div class="section-titles">
+                <h1 class="article-title">Support Resources</h1>
+                {% for support_resource in support_resources %}
+                    <a href="#base{{ support_resource.id }}" class="btn btn-outline-dark btn-sm">{{ support_resource.title }}</a>
+                {% endfor %}
+            </div>
+        <div class="content-section">
+        <!--Support form-->
+            <fieldset class="form-group">
+                <form action="{{ url_for('add_support_resources', notebook_id=notebook.id) }}" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        {{ support_resource_form.title.label(class='form-control-label') }}
+                        {% if support_resource_form.title.errors %}
+                          {{ support_resource_form.title(class= 'form-control form-control-lg is-invalid') }}
+                          <div class="invalid-feedback">
+                            {% for error in support_resource_form.title.errors %}
+                              <span> {{ error }}</span>
+                            {% endfor %}
+                          </div>
+                          {%else %}
+                          {{ support_resource_form.title(class='form-control form-control-lg') }}
+                        {% endif %}
+                    </div>
+
+
+
+                    <div class="form-group mt-2">
+                        <button  type="submit" class="plus-button" data-toggle="tooltip" title="Add New Support Resource"></button>
+                    </div>
+                </form>
+            </fieldset>
+        </div>
+
+
+        <div id="accordion" class="panel-group" role="tablist" aria-multiselectable="true">
+            {% for support_resource in support_resources %}
+
+            <div class="panel panel-default" data-toggle="tooltip" title="Relevance:{{ support_resource.relevance }}">
+                <div class="panel-heading" role="tab" id="heading{{ support_resource.id }}">
+                    <h4 class="panel-title" id="base{{ support_resource.id }}">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ support_resource.id }}" aria-expanded="true" aria-controls="collapse{{ support_resource.id }}">
+                            <i class="more-less icon-max"></i>
+                            {{ loop.index }} {{ support_resource.title }}
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse{{ support_resource.id }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ support_resource.id }}">
+                    <div class="panel-body">
+
+                        <section class="sheet padding-10mm" id="{{ support_resource.id }}">
+
+                                <!-- Write HTML just like a web page, parse |safe to escape-->
+                            <div name="view" class="view_ckcontent" style="display: none">
+                                {{ support_resource.content|safe}}
+                            </div>
+
+                            {% if notebook.author == current_user%}
+                                <div style="text-align: center">
+                                    <form action="{{ url_for('delete_support_resource', support_resource_id=support_resource.id, notebook_id = notebook.id) }}" method="POST">
+                                        <a class = "btn btn-primary mt-1 mb-1" href="{{ url_for('update_support', notebook_id = notebook.id, support_resource_id = support_resource.id) }}">Update Resource</a>
+                                        <button type="submit" class="btn btn-danger m-1">Delete</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                         </section>
+
+                    </div>
+                </div>
+		    </div>
+
+
+            {% endfor %}
+
+        </div>
+
+    <!-- Delete notebook Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <form action="{{ url_for('delete_notebook', notebook_id=notebook.id) }}" method="POST">
+                    <input type="submit" class="btn btn-danger" value="Delete">
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+{% endblock content %}
