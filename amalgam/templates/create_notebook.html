@@ -1,7 +1,7 @@
 {% extends "/layout.html" %}
 {% block content %}
 <div class="content-section">
-  <form class="" action="", method="post" enctype="multipart/form-data">
+  <form class="" action="" method="post" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
     <fieldset class="form-group">
       <legend class = "border-bottom mb-4"> {{ legend }} </legend>
@@ -31,11 +31,11 @@
             {% endfor %}
           </div>
           {%else %}
-            <textarea name="description" id="editor" class="view_ckcontent">
+            <div name="description" id="editor" class="view_ckcontent">
                 {% if form.description.data != None %}
-                    {{ form.description.data }}
+                    {{ form.description.data|safe}}
                 {% endif %}
-            </textarea>
+            </div>
 
         {% endif %}
       </div>

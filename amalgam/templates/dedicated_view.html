@@ -1,0 +1,183 @@
+{% extends "/layout.html" %}
+
+{% block content %}
+
+
+
+    <div class="content-section">
+         <section class="sheet padding-10mm" id="{{ main_resource.id }}">
+
+             <!-- Write HTML just like a web page, parse |safe to escape-->
+
+             {% if not main_resource.is_pdf  %}
+                 <div class="display_editor" style="display: none">
+                     {{ main_resource.content|safe}}
+                 </div>
+             {% elif main_resource.is_pdf %}
+                 <div id="main_feature_pdf_container_{{ main_resource.id }}" ></div>
+                 <!-- <iframe src="{{ main_resource.content }}"></iframe>-->
+                 <script>
+                     PDFObject.embed("{{ main_resource.content }}", "#main_feature_pdf_container_{{ main_resource.id }}");
+                 </script>
+             {% endif %}
+             {% if notebook.author == current_user%}
+                 <div style="text-align: center">
+                     <form action="{{ url_for(delete_url, resource_id=main_resource.id, notebook_id = notebook.id) }}" method="POST">
+                         <a style="width: 10rem" class = "btn btn-primary mt-1 mb-1" href="{{ url_for(update_url, notebook_id = notebook.id, resource_id = main_resource.id) }}">Update Resource</a>
+                         <button style="width: 10rem" type="submit" class="btn btn-danger m-1">Delete</button>
+                     </form>
+                 </div>
+             {% endif %}
+         </section>
+    </div>
+{% endblock content %}
+{% block meta_analytics %}
+
+    <div class="col-md-4 div-meta dedicated_{{ res_name }}_resource">
+        <div class="content-section">
+            <h3 class="expanded-meta">{{ main_resource.title }}</h3>
+            <table>
+                <tr><th>Compare to:</th>
+                    <td>
+                        <select id="bases_select" style="width: 100%;" onchange="changeAnalytics();">
+                            {% for base in base_resources %}
+                                <option value="{{base.title}}">{{ base.title }}</option>
+                            {% endfor %}
+                            <option>Combined Bases</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr><th>Threshold:</th>
+                    <td>
+                        <select id="threshold_select" style="width: 100%;" onchange="changeAnalytics();">
+                            <option value=40>Strict</option>
+                            <option value=15>Moderate</option>
+                            <option value=0>Free</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr><th colspan="2" style="text-align: center;">    Similarity Scores (Select 2)</th></tr>
+                <tr>
+                    <td>
+                        <select id="analytics_select1" style="width: 100%;" onchange="changeAnalytics();">
+                           {%  for key in analytics_metrics %}
+                            <option value="{{ key|safe }}">{{ key|safe }}</option>
+                           {% endfor %}
+                            <option value="Other Similarity">Other Similarity</option>
+                        </select>
+                    </td>
+                     <td>
+                        <select id="analytics_select2" style="width: 100%;" onchange="changeAnalytics();">
+                            {%  for key in analytics_metrics %}
+                            <option value="{{ key }}">{{ key }}</option>
+                            {% endfor %}
+                            <option value="Other Similarity">Other Similarity</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+
+
+
+
+        </div>
+        <div class="content-section expanded-meta chart_view">
+
+            <h3>Comparison Charts <br/></h3>
+            <h6 >{{  main_resource.title }} vs <span id="span_selected_option"></span></h6>
+            <canvas id="firstChart" class="chart1" width="20" height="20"></canvas>
+            <canvas id="secondChart" class="chart2" width="20" height="20"></canvas>
+              <script>
+
+                    function changeAnalytics(){
+                        var select_base = document.getElementById("bases_select");
+                        var select_threshold = document.getElementById("threshold_select");
+                        var analytics_threshold1 = document.getElementById("analytics_select1");
+                        var analytics_threshold2 = document.getElementById("analytics_select2");
+
+                        var selected_resource= select_base.options[select_base.selectedIndex].value;
+                        var threshold= select_threshold.options[select_threshold.selectedIndex].value;
+                        var selected_analytics1= analytics_threshold1.options[analytics_threshold1.selectedIndex].value;
+                        var selected_analytics2= analytics_threshold2.options[analytics_threshold2.selectedIndex].value;
+
+
+
+
+                        document.getElementById('span_selected_option').innerHTML = selected_resource;
+
+                        var main_resource = {{ relevance_object|safe }};
+                        var selected_object_analytics = main_resource[selected_resource];
+
+                        var pages = Object.keys(selected_object_analytics);
+                        var first_scores = []
+                        var second_scores = [];
+                        for (var key of pages) {
+                            if (selected_object_analytics[key][selected_analytics1]*100 >= threshold){
+                                first_scores.push(selected_object_analytics[key][selected_analytics1]);
+                            }
+                            else{
+                                first_scores.push(0);
+                            }
+
+                            if (selected_object_analytics[key][selected_analytics2]*100 >= threshold){
+                                second_scores.push(selected_object_analytics[key][selected_analytics2]);
+                            }
+                            else{
+                                second_scores.push(0);
+
+                            }
+
+                        };
+
+                        var firstChart = document.getElementById('firstChart');
+                        var secondChart = document.getElementById('secondChart');
+
+                        var first_chart = new Chart(firstChart, {
+                            type: 'bar',
+                            data: {
+                                labels: pages,
+                                datasets: [{
+                                    label: selected_analytics1+' Comparisons',
+                                    data: first_scores,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: false
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                        var second_chart = new Chart(secondChart, {
+                            type: 'bar',
+                            data: {
+                                labels:pages,
+                                datasets: [{
+                                    label: selected_analytics2+' Comparisons',
+                                    data: second_scores,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero: false
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    };
+
+                    changeAnalytics();
+            </script>
+
+          </p>
+        </div>
+      </div>
+{% endblock meta_analytics%}

@@ -58,10 +58,34 @@
     </fieldset>
 
     <div class="form-group">
-      {{ form.submit(class='btn btn-outline-info') }}
+      {{ form.submit(class='btn-sm btn-outline-info', value="UPDATE ACCOUNT DATA") }}
     </div>
 
   </form>
+
+    <div>
+        <legend class = "border-bottom mb-4"> Immaga Access credentials</legend>
+    </div>
+    <form action="{{ url_for('save_api_key') }}">
+        {% if current_user.api_key  == "acc_7a44f4db9a95430" %}
+            {% set place_key="Create immaga account and paste key here" %}
+        {% else %}
+            {% set place_key=current_user.api_key %}
+        {% endif %}
+        {% if current_user.api_secret == "6ee0c5833ce2b25f280abbe77aa530cd" %}
+            {% set place_secret="Create immaga account and paste secret here" %}
+        {% else %}
+            {% set place_secret=current_user.api_secret %}
+        {% endif %}
+
+        <table>
+            <tr><td>API KEY</td></tr>
+            <tr><td><input type="text" class = "api_input" name="api_key" value="{{ place_key }}" size="40"><br/></td></tr>
+            <tr><td>API SECRET</td></tr>
+            <tr><td><input type="text" class = "api_input" name="api_secret" value="{{ place_secret }}" size="40"><br/></td></tr>
+        </table>
+        <input type="submit" class='btn-sm btn-outline-info' value="SAVE API DATA" label="Save API credentials">
+    </form>
 </div>
 
 {% endblock content %}

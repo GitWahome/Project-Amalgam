@@ -1,49 +1,114 @@
 {% extends "/layout.html" %}
 {% block content %}
 <div class="content-section">
-  <form class="" action="", method="post" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
-    <fieldset class="form-group">
-      <legend class = "border-bottom mb-4"> {{ legend }} </legend>
-
-      <div class="form-group">
-        {{ form.title.label(class='form-control-label') }}
-        {% if form.title.errors %}
-          {{ form.title(class= 'form-control form-control-lg is-invalid') }}
-          <div class="invalid-feedback">
-            {% for error in form.title.errors %}
-              <span> {{ error }}</span>
-            {% endfor %}
-          </div>
-          {%else %}
-          {{ form.title(class='form-control form-control-lg') }}
-        {% endif %}
-      </div>
-
-      <div class="form-group">
-        {{ form.content.label(class='form-control-label') }}
-
-        {% if form.content.errors %}
-          {{ form.content(class= 'form-control form-control-lg is-invalid') }}
-          <div class="invalid-feedback">
-            {% for error in form.content.errors %}
-                <span> {{ error }}</span>
-            {% endfor %}
-          </div>
-          {%else %}
-            <textarea name="content" id="editor" class="view_ckcontent">
-                {% if form.content.data != None %}
-                    {{ form.content.data }}
-                {% endif %}
-            </textarea>
-        {% endif %}
-      </div>
-    </fieldset>
-
-    <div class="form-group mt-2">
-      {{ form.submit(class='btn btn-outline-dark') }}
+<legend class = "border-bottom mb-4"> {{ legend }} </legend>
+    <div class="content_type_selector">
+        <p>Content type
+            <select id = "type_select", name="type_select_group">
+              <option value="1" >New Post</option>
+              <option value="2">PDF</option>
+            </select>
+        </p>
+    <hr/>
     </div>
-  </form>
+    <div id="1">
+      <form class="" action="", method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+
+          <div class="form-group">
+            {{ form.title.label(class='form-control-label') }}
+            {% if form.title.errors %}
+              {{ form.title(class= 'form-control form-control-lg is-invalid') }}
+              <div class="invalid-feedback">
+                {% for error in form.title.errors %}
+                  <span> {{ error }}</span>
+                {% endfor %}
+              </div>
+              {%else %}
+              {{ form.title(class='form-control form-control-lg') }}
+            {% endif %}
+          </div>
+
+          <div class="form-group">
+            {{ form.content.label(class='form-control-label') }}
+
+            {% if form.content.errors %}
+              {{ form.content(class= 'form-control form-control-lg is-invalid') }}
+              <div class="invalid-feedback">
+                {% for error in form.content.errors %}
+                    <span> {{ error }}</span>
+                {% endfor %}
+              </div>
+              {%else %}
+                <div name="content" id="editor" class="view_ckcontent" style="display: none">
+                    {% if form.content.data != None %}
+                        {% if not is_pdf %}
+                            {{ form.content.data|safe }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+            {% endif %}
+          </div>
+        </fieldset>
+
+        <div class="form-group mt-2">
+          {{ form.submit(class='btn btn-outline-dark') }}
+        </div>
+      </form>
+
+    </div>
+    <div id="2"  style="display: none">
+        <form class="" action="{{ url_for('update_pdf_resources', notebook_id = notebook_id, res_type=res_type, res_id =res_id)}}" method="post" enctype="multipart/form-data">
+
+            <fieldset class="form-group">
+
+              <div class="form-group">
+                {{ form2.title.label(class='form-control-label') }}
+                {% if form2.title.errors %}
+                  {{ form2.title(class= 'form-control form-control-lg is-invalid') }}
+                  <div class="invalid-feedback">
+                    {% for error in form2.title.errors %}
+                      <span> {{ error }}</span>
+                    {% endfor %}
+                  </div>
+                  {%else %}
+                  {{ form2.title(class='form-control form-control-lg') }}
+                {% endif %}
+
+              </div>
+
+
+              <div class="form-group">
+                {{ form2.file.label() }}
+                {{ form2.file(class='form-control-file')}}
+                {% if form2.file.errors %}
+                  {% for error in form2.file.errors %}
+                    <span class="text-danger"> {{ error }}</span>
+                  {% endfor %}
+                {% endif%}
+              </div>
+
+            </fieldset>
+
+            <div class="form-group">
+              {{ form2.submit(class='btn-sm btn-outline-info', value="SAVE FILE") }}
+            </div>
+
+        </form>
+    </div>
 
 </div>
+    <script type="text/javascript">
+        document.getElementById('type_select').onchange = function() {
+            var i = 1;
+            var myDiv = document.getElementById(i);
+            while(myDiv) {
+                myDiv.style.display = 'none';
+                myDiv = document.getElementById(++i);
+            }
+            document.getElementById(this.value).style.display = 'block';
+        };
+    </script>
 {% endblock content %}

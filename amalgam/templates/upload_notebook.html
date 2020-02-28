@@ -1,0 +1,36 @@
+{% extends "/layout.html" %}
+{% block content %}
+    <h1>UPLOAD NOTEBOOK JSON</h1>
+    <div class="content-section">
+        <form action="" class = "upload_form" method="post" enctype="multipart/form-data">
+            <!--
+            <input type="file" name="uploaded_file">
+
+            <a><button class="fa fa-upload upload_button" type="submit">Upload Notebook</button></a>
+            -->
+            <fieldset class="form-group">
+              <div class="input_div ">
+              <p>Drag the notebook JSON file here for processing</p>
+                <div class="form-group">
+                {{ form.file(class='form-control-file uploaded_file')}}
+                {% if form.file.errors %}
+                  {% for error in form.file.errors %}
+                    <span class="text-danger"> {{ error }}</span>
+                  {% endfor %}
+                {% endif%}
+              </div>
+              </div>
+            </fieldset>
+            <button data-toggle="tooltip" title="Upload JSON file for processing" class="fa fa-upload upload_button" type="submit" ></button>
+
+
+        </form>
+        <script>
+            $(document).ready(function(){
+              $('.upload_form input').change(function () {
+                $('.upload_form p').text(this.value.split("\\").pop() + " selected");
+              });
+            });
+        </script>
+    </div>
+{% endblock content %}

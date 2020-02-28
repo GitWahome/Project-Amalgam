@@ -2,7 +2,7 @@ from amalgam.models import User
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, SubmitField, BooleanField, PasswordField, TextAreaField
+from wtforms import StringField, SubmitField, BooleanField, PasswordField, TextAreaField, HiddenField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 
 
@@ -26,7 +26,7 @@ class RegistrationForm(FlaskForm):
             raise ValidationError(f'Email {email.data} is already taken. Please use a different one.')
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', valiators=[DataRequired(),Email()])
+    email = StringField('Email', validators=[DataRequired(),Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
@@ -53,15 +53,30 @@ class UpdateAccountForm(FlaskForm):
                 raise ValidationError(f'Email {email.data} is already taken. Please use a different one.')
 class NotebookForm(FlaskForm):
     title = StringField('Notebook Title', validators=[DataRequired()])
-    description = TextAreaField('Description', validators=[DataRequired()])
+    description = HiddenField('Description', validators=[DataRequired()])
     submit = SubmitField('Save')
 
 class BaseResourceForm(FlaskForm):
     title = StringField('Base Resource Title', validators=[DataRequired()])
-    content = TextAreaField('Content', validators=[DataRequired()])
-    submit = SubmitField('Save')
+    content = HiddenField('Content', validators=[DataRequired()])
+    submit = SubmitField('Update Base Resource')
 
 class SupportResourceForm(FlaskForm):
     title = StringField('Support Resource Title', validators=[DataRequired()])
-    content = TextAreaField('Content', validators=[DataRequired()])
-    submit = SubmitField('Add Support Resource')
+    content = HiddenField('Content', validators=[DataRequired()])
+    submit = SubmitField('Save Support Resource')
+class AddPDFForm(FlaskForm):
+    title = StringField('PDF Resource Title', validators=[DataRequired()])
+    file = FileField('Upload PDF document', validators=[FileAllowed(['pdf']), DataRequired()])
+    submit = SubmitField('Save File')
+class AddJSONForm(FlaskForm):
+    file = FileField('Drag or Click to upload Notebook JSON', validators=[FileAllowed(['json']), DataRequired()])
+
+
+class NewBaseResourceForm(FlaskForm):
+    title = StringField('Base Resource Title', validators=[DataRequired()])
+    submit = SubmitField('Save Base Resource')
+
+class NewSupportResourceForm(FlaskForm):
+    title = StringField('Support Resource Title', validators=[DataRequired()])
+    submit = SubmitField('Save Support Resource')

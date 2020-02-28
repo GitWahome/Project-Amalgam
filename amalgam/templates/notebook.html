@@ -9,19 +9,37 @@
                 <h2 class="article-title">{{ notebook.title }}</h2>
                 <b>Written by</b> <a class="mr-2" href="{{ url_for('user_notebooks', username=notebook.author.username)}}">{{ notebook.author.username }}</a>
                 <b>on</b> <small class="text-muted">{{ notebook.date_posted.strftime('%Y-%m-%d')}}</small>
-            </div>
-             <div>
-                <small>{{ notebook.description|safe }}</small>
-            </div>
 
+            </div>
+             <div class = "display_editor" style="display: none">
+                {{ notebook.description|safe }}
 
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('update_notebook', notebook_id = notebook.id) }}"><button class="btn-sm btn-primary" >Update Notebook</button></a>
-                <button type="button" class="btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Notebook</button>
-            {%endif%}
+            </div>
+            <div class="notebook_buttons">
+                  {% if current_user.is_authenticated %}
+
+                      <a href="{{ notebook_json_file }}" data-toggle="tooltip" title="Download Notebook as JSON" download>
+                          <button class="fa fa-download download_button nbuttons" > </button>
+                      </a>
+                      <a href="{{ url_for('update_notebook', notebook_id = notebook.id) }}"
+                         data-toggle="tooltip" title="Edit Notebook detail">
+                          <button class="fa fa-edit update_button nbuttons" ></button>
+                      </a>
+                      <a href="{{ url_for('update_relevance', notebook_id=notebook.id) }}"
+                         data-toggle="tooltip" title="Refresh Notebook">
+                          <button class="fa fa-refresh refresh_button nbuttons"></button>
+                      </a>
+                      <span data-toggle="tooltip" title="Delete Notebook">
+                          <button type="button" class="fa fa-trash delete_button nbuttons" data-toggle="modal" data-target="#deleteModal"
+                          ></button></span>
+
+                  {%endif%}
+              </div>
+
 
 
       </div>
+
 
 
 </article>
@@ -38,16 +56,16 @@
             <fieldset class="form-group">
                 <form action="{{ url_for('add_base_resources', notebook_id=notebook.id) }}" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                        {{ base_resource_form.title.label(class='form-control-label') }}
-                        {% if base_resource_form.title.errors %}
-                          {{ base_resource_form.title(class= 'form-control form-control-lg is-invalid') }}
+                        {{ new_base_resource_form.title.label(class='form-control-label') }}
+                        {% if new_base_resource_form.title.errors %}
+                          {{ new_base_resource_form.title(class= 'form-control form-control-lg is-invalid') }}
                           <div class="invalid-feedback">
-                            {% for error in base_resource_form.title.errors %}
+                            {% for error in new_base_resource_form.title.errors %}
                               <span> {{ error }}</span>
                             {% endfor %}
                           </div>
                           {%else %}
-                          {{ base_resource_form.title(class='form-control form-control-lg') }}
+                          {{ new_base_resource_form.title(class='form-control form-control-lg', id = 'base_title', value = "") }}
                         {% endif %}
                     </div>
                      <div class="form-group mt-2">
@@ -63,7 +81,7 @@
         <div id="accordion" class="panel-group" role="tablist" aria-multiselectable="true">
             {% for base_resource in base_resources %}
 
-            <div class="panel panel-default">
+            <div class="panel panel-default" data-toggle="tooltip" title="Click to expand">
                 <div class="panel-heading" role="tab" id="heading{{ base_resource.id }}">
                     <h4 class="panel-title" id="base{{ base_resource.id }}">
                         <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ base_resource.id }}base" aria-expanded="true" aria-controls="collapse{{ base_resource.id }}base">
@@ -78,15 +96,26 @@
                         <section class="sheet padding-10mm" id="{{ base_resource.id }}">
 
                                 <!-- Write HTML just like a web page, parse |safe to escape-->
-                            <div name="view" class="view_ckcontent" style="display: none">
-                                {{ base_resource.content|safe}}
-                            </div>
+                            {% if not base_resource.is_pdf  %}
+                                <div class="display_editor" style="display: none">
+                                    {{ base_resource.content|safe}}
+                                </div>
+                            {% elif base_resource.is_pdf %}
+                                <div id="base_feature_pdf_container_{{ base_resource.id }}" ></div>
+                                <!-- <iframe src="{{ base_resource.content }}"></iframe>-->
+                                <script>
+                                    PDFObject.embed("{{ base_resource.content }}", "#base_feature_pdf_container_{{ base_resource.id }}");
+                                </script>
+
+
+                            {% endif %}
 
                             {% if notebook.author == current_user%}
                                 <div style="text-align: center">
-                                    <form action="{{ url_for('delete_base_resource', base_resource_id=base_resource.id, notebook_id = notebook.id) }}" method="POST">
-                                        <a class = "btn btn-primary mt-1 mb-1" href="{{ url_for('update_base', notebook_id = notebook.id, base_resource_id = base_resource.id) }}">Update Resource</a>
-                                        <button type="submit" class="btn btn-danger m-1">Delete</button>
+                                    <form action="{{ url_for('delete_base_resource', resource_id=base_resource.id, notebook_id = notebook.id) }}" method="POST">
+                                        <a style="width: 10rem" class = "btn btn-primary mt-1 mb-1" href="{{ url_for('update_base', notebook_id = notebook.id, resource_id = base_resource.id) }}">Update Resource</a>
+                                        <a style="width: 10rem" class = "btn btn-info mt-1 mb-1" href="{{ url_for('dedicated_view', notebook_id = notebook.id, res_type = "BASE",  res_id = base_resource.id )}}">Dedicated View</a>
+                                        <button style="width: 10rem" type="submit" class="btn btn-danger m-1">Delete</button>
                                     </form>
                                 </div>
                             {% endif %}
@@ -117,21 +146,18 @@
             <fieldset class="form-group">
                 <form action="{{ url_for('add_support_resources', notebook_id=notebook.id) }}" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                        {{ support_resource_form.title.label(class='form-control-label') }}
-                        {% if support_resource_form.title.errors %}
-                          {{ support_resource_form.title(class= 'form-control form-control-lg is-invalid') }}
+                         {{ new_support_resource_form.title.label(class='form-control-label') }}
+                        {% if new_support_resource_form.title.errors %}
+                          {{ new_support_resource_form.title(class= 'form-control form-control-lg is-invalid') }}
                           <div class="invalid-feedback">
-                            {% for error in support_resource_form.title.errors %}
+                            {% for error in new_support_resource_form.title.errors %}
                               <span> {{ error }}</span>
                             {% endfor %}
                           </div>
                           {%else %}
-                          {{ support_resource_form.title(class='form-control form-control-lg') }}
+                          {{ new_support_resource_form.title(class='form-control form-control-lg', id = "support_title", value="") }}
                         {% endif %}
                     </div>
-
-
-
                     <div class="form-group mt-2">
                         <button  type="submit" class="plus-button" data-toggle="tooltip" title="Add New Support Resource"></button>
                     </div>
@@ -143,7 +169,7 @@
         <div id="accordion" class="panel-group" role="tablist" aria-multiselectable="true">
             {% for support_resource in support_resources %}
 
-            <div class="panel panel-default" data-toggle="tooltip" title="Relevance:{{ support_resource.relevance }}">
+            <div class="panel panel-default" data-toggle="tooltip" title="Click to expand">
                 <div class="panel-heading" role="tab" id="heading{{ support_resource.id }}">
                     <h4 class="panel-title" id="base{{ support_resource.id }}">
                         <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ support_resource.id }}" aria-expanded="true" aria-controls="collapse{{ support_resource.id }}">
@@ -158,15 +184,27 @@
                         <section class="sheet padding-10mm" id="{{ support_resource.id }}">
 
                                 <!-- Write HTML just like a web page, parse |safe to escape-->
-                            <div name="view" class="view_ckcontent" style="display: none">
-                                {{ support_resource.content|safe}}
-                            </div>
 
+                                {% if not support_resource.is_pdf  %}
+                                    <div class="display_editor" style="display: none">
+                                        {{ support_resource.content|safe}}
+                                    </div>
+                                {% elif support_resource.is_pdf %}
+                                    <div id="support_feature_pdf_container_{{ support_resource.id }}" ></div>
+                                    <script>
+                                        PDFObject.embed("{{ support_resource.content }}", "#support_feature_pdf_container_{{ support_resource.id }}");
+                                    </script>
+
+
+
+
+                                {% endif %}
                             {% if notebook.author == current_user%}
                                 <div style="text-align: center">
-                                    <form action="{{ url_for('delete_support_resource', support_resource_id=support_resource.id, notebook_id = notebook.id) }}" method="POST">
-                                        <a class = "btn btn-primary mt-1 mb-1" href="{{ url_for('update_support', notebook_id = notebook.id, support_resource_id = support_resource.id) }}">Update Resource</a>
-                                        <button type="submit" class="btn btn-danger m-1">Delete</button>
+                                    <form action="{{ url_for('delete_support_resource', resource_id=support_resource.id, notebook_id = notebook.id) }}" method="POST">
+                                        <a style="width: 10rem" class = "btn btn-primary mt-1 mb-1" href="{{ url_for('update_support', notebook_id = notebook.id, resource_id = support_resource.id) }}">Update Resource</a>
+                                        <a style="width: 10rem" class = "btn btn-info mt-1 mb-1" href="{{ url_for('dedicated_view', notebook_id = notebook.id, res_type = "SUPPORT",  res_id = support_resource.id) }}">Dedicated View</a>
+                                        <button style="width: 10rem" type="submit" class="btn btn-danger m-1">Delete</button>
                                     </form>
                                 </div>
                             {% endif %}
@@ -188,7 +226,6 @@
               <div class="modal-header">
                 <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -204,3 +241,8 @@
     </div>
 
 {% endblock content %}
+{% block meta_analytics %}
+    <div class="col-md-4 div-meta">
+
+      </div>
+{% endblock meta_analytics%}

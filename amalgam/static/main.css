@@ -1,4 +1,4 @@
-
+@import "./node_modules/quill/dist/quill.core.css";
 body {
   background-image:url("./images/background/bricks_background.png");
   margin-top: 4rem;
@@ -123,18 +123,23 @@ a.article-title:hover {
   margin:auto;
   z-index: 100;
 }
-
+#accordion{
+    background-color: rgba(225,237,245,0.4);
+}
 .panel-group .panel {
     border-radius: 0;
     box-shadow: none;
     border-color: #EEEEEE;
 }
 
+
 .panel-default > .panel-heading {
     padding: 0;
     border-radius: 0;
     color: #212121;
-    background-color: #FAFAFA;
+    background-color: lightgrey;
+    border-spacing: 10px;
+    border-color: rgba(128, 128, 128, 0.6);
     border-color: #EEEEEE;
 }
 
@@ -156,6 +161,7 @@ a.article-title:hover {
 .panel-default > .panel-heading + .panel-collapse > .panel-body {
     border-top-color: #EEEEEE;
 }
+
 .icon-max::before{
     content: "\2795";
     font-style: normal;
@@ -166,7 +172,152 @@ a.article-title:hover {
     font-style: normal;
     padding-left: 50%;
 }
+.view_ckcontent{
+    background: white;
+    border: solid 0.05px grey;
+}
 
-textarea.view_ckcontent{
+/*Display Editor style*/
+
+.display_editor {
+    display: none;
+    background: white;
+    height: fit-content ;
+    border: none !important;
+
+}
+
+.api_input{
+    background-color: whitesmoke;
+    color: black;
+    border-left: white solid 0px;
+    border-right: white solid 0px;
+    border-top: white solid 0px;
+    font-family: "Fira Code Retina";
+    opacity: 0.5;
+}
+.api_input:focus{
+    opacity: 1;
+}
+
+
+#editor {
+  height: fit-content;
+}
+
+.pdfobject-container {
+    height: 50rem;;
+    border: 1rem solid rgba(0,0,0,.1);
+
+}
+.expanded-meta{
+    width: 100%;
+    text-align: center;
+}
+.notebook_buttons{  
+    align-content: center;
+    width: fit-content;
+    padding: 10px;
+    font-size: 25px;
+
+}
+.download_button{
+    color: blue;
+    background-color: inherit;
+    border: none    ;
+}
+.download_button:hover{
+	background-color:blue;
+	color: white;
+
+}
+
+.update_button{
+    color: purple;
+    background-color: inherit;
+    border: none;
+}
+.update_button:hover{
+	background-color:purple;
+	color: white;
+
+}
+
+.refresh_button{
+    color: green;
+    background-color: inherit;
+    border: none    ;
+}
+.refresh_button:hover{
+    background-color:green;
+	color: white;
+}
+
+.delete_button{
+    color: red;
+    background-color: inherit;
+    border: none    ;
+}
+.delete_button:hover{
+	background-color:red;
+	color: white;
+
+}
+
+.nbuttons{
+    border: 2px solid lightgrey;
+    background-color: #fff;
+	font-size: 10px;
+    width: 40px;
+    height: 40px;
+	border-radius: 50%;
+	position: relative;
+}
+.delete_button:hover{
+	background-color:red;
+	color: white;
+
+}
+
+.notebook_buttons a:hover{
+    color: white;
+}
+
+.upload_form p{
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    font-family: Arial;
+}
+
+
+.upload_form input{
+    position: relative;
+    margin: 5px;
+    padding: 5px;
+    width: 100%;
+    height:200px;
+    opacity: 0;
+}
+.upload_form .input_div{
+    border: 4px dashed black !important;
+}
+.upload_button {
+    width: 40px;
+    height: 40px;
+	border-radius: 50%;
+    margin-left: 48%;
+    color: green;
+    background-color: white;
+    border: 2px solid lightgrey;
+}
+.upload_button:hover{
+    color: white;
+    background-color: green;
+}
+.chart_view:hover{
+    transform: scale(1.05);
+}
+.dedicated_Base{
     display: none;
 }
